@@ -1,7 +1,6 @@
 import os
 import chess
-import chess.xboard
-import chess.uci
+import chess.engine
 import backoff
 import subprocess
 
@@ -137,9 +136,7 @@ class UCIEngine(EngineWrapper):
 class XBoardEngine(EngineWrapper):
     def __init__(self, board, commands, options=None, silence_stderr=False):
         commands = commands[0] if len(commands) == 1 else commands
-        self.engine = chess.xboard.popen_engine(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
-
-        self.engine.xboard()
+        self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
 
         if board.chess960:
             self.engine.send_variant("fischerandom")
