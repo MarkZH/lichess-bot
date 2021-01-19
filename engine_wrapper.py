@@ -59,7 +59,10 @@ class EngineWrapper:
         pass
 
     def name(self):
-        return self.engine.name
+        return self.engine.id["name"]
+
+    def stop(self):
+        pass
 
     def quit(self):
         self.engine.quit()
@@ -135,106 +138,49 @@ class UCIEngine(EngineWrapper):
 
 class XBoardEngine(EngineWrapper):
     def __init__(self, board, commands, options=None, silence_stderr=False):
-        commands = commands[0] if len(commands) == 1 else commands
         self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
-
-        if board.chess960:
-            self.engine.send_variant("fischerandom")
-        elif type(board).uci_variant != "chess":
-            self.engine.send_variant(type(board).uci_variant)
-
-        if options:
-            self._handle_options(options)
-
-        if board.fen() != chess.STARTING_FEN:
-            self.engine.force()
-            if board.root().fen() != chess.STARTING_FEN:
-                self.engine.setboard(board.root())
-            for move in board.move_stack:
-                self.engine.usermove(move)
-        self.last_fen_seen = board.fen()
-
-        post_handler = chess.xboard.PostHandler()
-        self.engine.post_handlers.append(post_handler)
-
-    def _handle_options(self, options):
-        for option, value in options.items():
-            if option == "memory":
-                self.engine.memory(value)
-            elif option == "cores":
-                self.engine.cores(value)
-            elif option == "egtpath":
-                for egttype, egtpath in value.items():
-                    try:
-                        self.engine.egtpath(egttype, egtpath)
-                    except chess.EngineStateException:
-                        # If the user specifies more TBs than the engine supports, ignore the error.
-                        pass
-            else:
-                try:
-                    self.engine.features.set_option(option, value)
-                except chess.EngineStateException:
-                    pass
+        self.engine.configure(options)
 
     def set_time_control(self, game):
-        self.minutes = game.clock_initial / 1000 // 60
+        self.minutes = game.clock_initial // 1000 // 60
         self.seconds = game.clock_initial // 1000 % 60
         self.inc = game.clock_increment // 1000
-        self.send_time()
+        self.send_time_control()
 
-    def send_time(self):
-        self.engine.level(0, self.minutes, self.seconds, self.inc)
-
-    def send_last_move(self, board):
-        if board.fen() == self.last_fen_seen:
-            return
-        self.engine.force()
-        try:
-            self.engine.usermove(board.peek())
-        except IndexError:
-            self.engine.setboard(board)
-        self.last_fen_seen = board.fen()
+    def send_time_control(self):
+        self.engine.protocol.send_line(f"level 0 {self.minutes}:{self.seconds} {self.inc}")
 
     def first_search(self, board, movetime):
-        self.send_last_move(board)
-        self.engine.st(movetime // 1000)
-        bestmove = self.engine.go()
-        self.send_time()
-
-        return bestmove
+        result = self.engine.play(board, chess.engine.Limit(time=movetime//1000), info=chess.engine.INFO_CURRLINE)
+        self.send_time_control()
+        return result.move
 
     def search(self, board, wtime, btime, winc, binc):
-        self.send_last_move(board)
-
-        # XBoard engines expect time in units of 1/100 seconds.
-        if board.turn == chess.WHITE:
-            self.engine.time(wtime // 10)
-            self.engine.otim(btime // 10)
-        else:
-            self.engine.time(btime // 10)
-            self.engine.otim(wtime // 10)
-        return self.engine.go()
+        result = self.engine.play(board,
+                                  chess.engine.Limit(white_clock=wtime/1000,
+                                                     black_clock=btime/1000,
+                                                     white_inc=winc/1000,
+                                                     black_inc=binc/1000),
+                                  info=chess.engine.INFO_CURRLINE)
+        return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
         return self.search(board, wtime, btime, winc, binc), None
 
+    def stop(self):
+        self.engine.protocol.send_line("?")
+
     def print_stats(self):
-        print_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
+        pass # print_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
 
     def get_stats(self):
-        return get_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
-
-    def name(self):
-        try:
-            return self.engine.features.get("myname")
-        except Exception:
-            return None
+        pass # return get_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
 
     def get_opponent_info(self, game):
         title = game.opponent.title + " " if game.opponent.title else ""
         if game.opponent.name:
-            self.engine.opponent_name(title + game.opponent.name)
+            self.engine.protocol.send_line(f"name {title}{game.opponent.name}")
         if game.me.rating is not None and game.opponent.rating is not None:
-            self.engine.rating(game.me.rating, game.opponent.rating)
+            self.engine.protocol.send_line(f"rating {game.me.rating} {game.opponent.rating}")
         if game.opponent.title == "BOT":
-            self.engine.computer()
+            self.engine.protocol.send_line("computer")

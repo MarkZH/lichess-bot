@@ -314,7 +314,7 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
                 break
 
     logger.info("--- {} Game over".format(game.url()))
-    engine.engine.stop()
+    engine.stop()
     engine.quit()
     if ponder_thread is not None:
         ponder_thread.join()
