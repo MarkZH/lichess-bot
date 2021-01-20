@@ -71,62 +71,37 @@ class EngineWrapper:
 
 class UCIEngine(EngineWrapper):
     def __init__(self, board, commands, options, silence_stderr=False):
-        commands = commands[0] if len(commands) == 1 else commands
         self.go_commands = options.get("go_commands", {})
-
-        self.engine = chess.uci.popen_engine(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
-        self.engine.uci()
-
-        if options:
-            self.engine.setoption(options)
-
-        self.engine.setoption({
-            "UCI_Variant": type(board).uci_variant,
-            "UCI_Chess960": board.chess960
-        })
-        self.engine.position(board)
-
-        info_handler = chess.uci.InfoHandler()
-        self.engine.info_handlers.append(info_handler)
+        if self.go_commands:
+            del options["go_commands"]
+        self.engine = chess.engine.SimpleEngine.popen_uci(commands)
+        for option, value in options.items():
+            self.engine.protocol._setoption(option, value)
 
     def first_search(self, board, movetime):
-        self.engine.position(board)
-        best_move, _ = self.engine.go(movetime=movetime)
-        return best_move
+        result = self.engine.play(board, chess.engine.Limit(time=movetime/1000))
+        return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
-        self.engine.position(board)
-        best_move, ponder_move = self.engine.go(
-            wtime=wtime,
-            btime=btime,
-            winc=winc,
-            binc=binc,
-            ponder=ponder
-        )
-        return (best_move, ponder_move)
-
-    def search(self, board, wtime, btime, winc, binc):
-        self.engine.position(board)
         cmds = self.go_commands
-        best_move, _ = self.engine.go(
-            wtime=wtime,
-            btime=btime,
-            winc=winc,
-            binc=binc,
-            depth=cmds.get("depth"),
-            nodes=cmds.get("nodes"),
-            movetime=cmds.get("movetime")
-        )
-        return best_move
+        time_limit = chess.engine.Limit(white_clock=wtime/1000,
+                                        black_clock=btime/1000,
+                                        white_inc=winc/1000,
+                                        black_inc=binc/1000,
+                                        depth=cmds.get("depth"),
+                                        nodes=cmds.get("nodes"),
+                                        time=cmds.get("movetime"))
+        result = self.engine.play(board, time_limit, ponder=ponder)
+        return (result.move, result.ponder)
 
     def stop(self):
         self.engine.protocol.send_line("stop")
 
     def print_stats(self):
-        print_handler_stats(self.engine.info_handlers[0].info, ["string", "depth", "nps", "nodes", "score"])
+        pass # print_handler_stats(self.engine.info_handlers[0].info, ["string", "depth", "nps", "nodes", "score"])
 
     def get_stats(self):
-        return get_handler_stats(self.engine.info_handlers[0].info, ["depth", "nps", "nodes", "score"])
+        pass # return get_handler_stats(self.engine.info_handlers[0].info, ["depth", "nps", "nodes", "score"])
 
     def get_opponent_info(self, game):
         name = game.opponent.name
@@ -134,7 +109,10 @@ class UCIEngine(EngineWrapper):
             rating = game.opponent.rating if game.opponent.rating is not None else "none"
             title = game.opponent.title if game.opponent.title else "none"
             player_type = "computer" if title == "BOT" else "human"
-            self.engine.setoption({"UCI_Opponent": "{} {} {} {}".format(title, rating, player_type, name)})
+            try:
+                self.engine.protocol._setoption("UCI_Opponent", f"{title} {rating} {player_type} {name}")
+            except chess.engine.EngineError:
+                pass
 
 
 class XBoardEngine(EngineWrapper):
