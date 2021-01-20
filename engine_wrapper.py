@@ -3,6 +3,7 @@ import chess
 import chess.engine
 import backoff
 import subprocess
+from enum import Enum, auto
 
 
 @backoff.on_exception(backoff.expo, BaseException, max_time=120)
@@ -137,22 +138,19 @@ class UCIEngine(EngineWrapper):
 
 
 class XBoardEngine(EngineWrapper):
+    class GameState(Enum):
+        FirstMove = auto()
+        OtherMove = auto()
+
     def __init__(self, board, commands, options=None, silence_stderr=False):
-        self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
+        self.engine = chess.engine.SimpleEngine.popen_xboard(commands)
         self.engine.configure(options)
 
-    def set_time_control(self, game):
-        self.minutes = game.clock_initial // 1000 // 60
-        self.seconds = game.clock_initial // 1000 % 60
-        self.inc = game.clock_increment // 1000
-        self.send_time_control()
-
-    def send_time_control(self):
-        self.engine.protocol.send_line(f"level 0 {self.minutes}:{self.seconds} {self.inc}")
-
     def first_search(self, board, movetime):
-        result = self.engine.play(board, chess.engine.Limit(time=movetime//1000), info=chess.engine.INFO_CURRLINE)
-        self.send_time_control()
+        result = self.engine.play(board,
+                                  chess.engine.Limit(time=movetime/1000),
+                                  info=chess.engine.INFO_CURRLINE,
+                                  game=XBoardEngine.GameState.FirstMove)
         return result.move
 
     def search(self, board, wtime, btime, winc, binc):
@@ -160,8 +158,10 @@ class XBoardEngine(EngineWrapper):
                                   chess.engine.Limit(white_clock=wtime/1000,
                                                      black_clock=btime/1000,
                                                      white_inc=winc/1000,
-                                                     black_inc=binc/1000),
-                                  info=chess.engine.INFO_CURRLINE)
+                                                     black_inc=binc/1000,
+                                                     remaining_moves=10000),
+                                  info=chess.engine.INFO_CURRLINE,
+                                  game=XBoardEngine.GameState.OtherMove)
         return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):

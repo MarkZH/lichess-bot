@@ -164,8 +164,6 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
         best_move, ponder_move = engine.search_with_ponder(board, wtime, btime, winc, binc, True)
         ponder_results[game.id] = (best_move, ponder_move)
 
-    engine.set_time_control(game)
-
     if len(board.move_stack) < 2:
         while not terminated:
             try:
@@ -374,7 +372,7 @@ def get_book_move(board, config):
         if move is not None:
             logger.info("Got move {} from book {}".format(move, book))
             return move
-        
+
     return None
 
 
