@@ -71,7 +71,7 @@ class UCIEngine(EngineWrapper):
         self.go_commands = options.get("go_commands", {})
         if self.go_commands:
             del options["go_commands"]
-        self.engine = chess.engine.SimpleEngine.popen_uci(commands)
+        self.engine = chess.engine.SimpleEngine.popen_uci(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
         for option, value in options.items():
             self.engine.protocol._setoption(option, value)
 
@@ -118,7 +118,7 @@ class XBoardEngine(EngineWrapper):
         OtherMove = auto()
 
     def __init__(self, board, commands, options=None, silence_stderr=False):
-        self.engine = chess.engine.SimpleEngine.popen_xboard(commands)
+        self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
         self.engine.configure(options)
 
     def first_search(self, board, movetime):
