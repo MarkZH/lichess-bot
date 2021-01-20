@@ -239,7 +239,7 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
                     if ponder_thread is not None:
                         move_uci = moves[-1]
                         if ponder_uci == move_uci:
-                            engine.engine.ponderhit()
+                            engine.ponderhit()
                             ponder_thread.join()
                             ponder_thread = None
                             best_move, ponder_move = ponder_results[game.id]

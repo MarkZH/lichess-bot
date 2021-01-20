@@ -50,6 +50,9 @@ class EngineWrapper:
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
         pass
 
+    def ponderhit(self):
+        pass
+
     def print_stats(self):
         pass
 
@@ -106,6 +109,9 @@ class UCIEngine(EngineWrapper):
             title = game.opponent.title if game.opponent.title else "none"
             player_type = "computer" if title == "BOT" else "human"
             self.engine.protocol._setoption("UCI_Opponent", f"{title} {rating} {player_type} {name}")
+
+    def ponderhit(self):
+        self.engine.protocol.send_line("ponderhit")
 
 
 class XBoardEngine(EngineWrapper):
