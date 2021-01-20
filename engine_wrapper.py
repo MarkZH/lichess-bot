@@ -123,7 +123,7 @@ class XBoardEngine(EngineWrapper):
 
     def first_search(self, board, movetime):
         result = self.engine.play(board,
-                                  chess.engine.Limit(time=movetime/1000),
+                                  chess.engine.Limit(time=movetime//1000),
                                   info=chess.engine.INFO_CURRLINE,
                                   game=XBoardEngine.GameState.FirstMove)
         return result.move
