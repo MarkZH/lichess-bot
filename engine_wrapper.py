@@ -47,7 +47,7 @@ class EngineWrapper:
     def first_search(self, board, movetime):
         pass
 
-    def search(self, board, wtime, btime, winc, binc):
+    def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
         pass
 
     def print_stats(self):
@@ -128,7 +128,7 @@ class XBoardEngine(EngineWrapper):
                                   game=XBoardEngine.GameState.FirstMove)
         return result.move
 
-    def search(self, board, wtime, btime, winc, binc):
+    def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
         time_limit = chess.engine.Limit(white_clock=wtime/1000,
                                         black_clock=btime/1000,
                                         white_inc=winc/1000,
@@ -137,11 +137,9 @@ class XBoardEngine(EngineWrapper):
         result = self.engine.play(board,
                                   time_limit,
                                   info=chess.engine.INFO_CURRLINE,
-                                  game=XBoardEngine.GameState.OtherMove)
-        return result.move
-
-    def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
-        return self.search(board, wtime, btime, winc, binc), None
+                                  game=XBoardEngine.GameState.OtherMove,
+                                  ponder=ponder)
+        return result.move, None
 
     def stop(self):
         self.engine.protocol.send_line("?")
