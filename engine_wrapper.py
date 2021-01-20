@@ -100,7 +100,7 @@ class UCIEngine(EngineWrapper):
         pass # print_handler_stats(self.engine.info_handlers[0].info, ["string", "depth", "nps", "nodes", "score"])
 
     def get_stats(self):
-        pass # return get_handler_stats(self.engine.info_handlers[0].info, ["depth", "nps", "nodes", "score"])
+        return [] # return get_handler_stats(self.engine.info_handlers[0].info, ["depth", "nps", "nodes", "score"])
 
     def get_opponent_info(self, game):
         name = game.opponent.name
