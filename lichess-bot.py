@@ -245,7 +245,7 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
                             best_move, ponder_move = ponder_results[game.id]
                             engine.print_stats()
                         else:
-                            engine.engine.stop()
+                            engine.stop()
                             ponder_thread.join()
                             ponder_thread = None
                         ponder_uci = None

@@ -120,7 +120,7 @@ class UCIEngine(EngineWrapper):
         return best_move
 
     def stop(self):
-        self.engine.stop()
+        self.engine.protocol.send_line("stop")
 
     def print_stats(self):
         print_handler_stats(self.engine.info_handlers[0].info, ["string", "depth", "nps", "nodes", "score"])
