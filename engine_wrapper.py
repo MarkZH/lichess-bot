@@ -72,8 +72,7 @@ class UCIEngine(EngineWrapper):
         if self.go_commands:
             del options["go_commands"]
         self.engine = chess.engine.SimpleEngine.popen_uci(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
-        for option, value in options.items():
-            self.engine.protocol._setoption(option, value)
+        self.engine.configure(options)
 
     def first_search(self, board, movetime):
         result = self.engine.play(board, chess.engine.Limit(time=movetime/1000))
