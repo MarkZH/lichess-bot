@@ -76,9 +76,11 @@ class UCIEngine(EngineWrapper):
             del options["go_commands"]
         self.engine = chess.engine.SimpleEngine.popen_uci(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
         self.engine.configure(options)
+        self.last_move_info = {}
 
     def first_search(self, board, movetime):
-        result = self.engine.play(board, chess.engine.Limit(time=movetime/1000))
+        result = self.engine.play(board, chess.engine.Limit(time=movetime/1000), info=chess.engine.INFO_ALL)
+        self.last_move_info = result.info
         return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
@@ -90,17 +92,18 @@ class UCIEngine(EngineWrapper):
                                         depth=cmds.get("depth"),
                                         nodes=cmds.get("nodes"),
                                         time=cmds.get("movetime"))
-        result = self.engine.play(board, time_limit, ponder=ponder)
+        result = self.engine.play(board, time_limit, ponder=ponder, info=chess.engine.INFO_ALL)
+        self.last_move_info = result.info
         return (result.move, result.ponder)
 
     def stop(self):
         self.engine.protocol.send_line("stop")
 
     def print_stats(self):
-        pass # print_handler_stats(self.engine.info_handlers[0].info, ["string", "depth", "nps", "nodes", "score"])
+        print_handler_stats(self.last_move_info, ["string", "depth", "nps", "nodes", "score"])
 
     def get_stats(self):
-        return [] # return get_handler_stats(self.engine.info_handlers[0].info, ["depth", "nps", "nodes", "score"])
+        return get_handler_stats(self.last_move_info, ["depth", "nps", "nodes", "score"])
 
     def get_opponent_info(self, game):
         name = game.opponent.name
@@ -122,12 +125,14 @@ class XBoardEngine(EngineWrapper):
     def __init__(self, board, commands, options=None, silence_stderr=False):
         self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
         self.engine.configure(options)
+        self.last_move_info = {}
 
     def first_search(self, board, movetime):
         result = self.engine.play(board,
                                   chess.engine.Limit(time=movetime//1000),
-                                  info=chess.engine.INFO_CURRLINE,
+                                  info=chess.engine.INFO_ALL,
                                   game=XBoardEngine.GameState.FirstMove)
+        self.last_move_info = result.info
         return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
@@ -138,19 +143,20 @@ class XBoardEngine(EngineWrapper):
                                         remaining_moves=10000)
         result = self.engine.play(board,
                                   time_limit,
-                                  info=chess.engine.INFO_CURRLINE,
+                                  info=chess.engine.INFO_ALL,
                                   game=XBoardEngine.GameState.OtherMove,
                                   ponder=ponder)
+        self.last_move_info = result.info
         return result.move, None
 
     def stop(self):
         self.engine.protocol.send_line("?")
 
     def print_stats(self):
-        pass # print_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
+        print_handler_stats(self.last_move_info, ["depth", "nodes", "score"])
 
     def get_stats(self):
-        pass # return get_handler_stats(self.engine.post_handlers[0].post, ["depth", "nodes", "score"])
+        return get_handler_stats(self.last_move_info, ["depth", "nodes", "score"])
 
     def get_opponent_info(self, game):
         title = game.opponent.title + " " if game.opponent.title else ""
