@@ -101,14 +101,11 @@ class UCIEngine(EngineWrapper):
 
     def get_opponent_info(self, game):
         name = game.opponent.name
-        if name:
+        if name and "UCI_Opponent" in self.engine.protocol.config:
             rating = game.opponent.rating if game.opponent.rating is not None else "none"
             title = game.opponent.title if game.opponent.title else "none"
             player_type = "computer" if title == "BOT" else "human"
-            try:
-                self.engine.protocol._setoption("UCI_Opponent", f"{title} {rating} {player_type} {name}")
-            except chess.engine.EngineError:
-                pass
+            self.engine.protocol._setoption("UCI_Opponent", f"{title} {rating} {player_type} {name}")
 
 
 class XBoardEngine(EngineWrapper):
@@ -151,7 +148,7 @@ class XBoardEngine(EngineWrapper):
 
     def get_opponent_info(self, game):
         title = game.opponent.title + " " if game.opponent.title else ""
-        if game.opponent.name:
+        if game.opponent.name and self.engine.config.get("name", True):
             self.engine.protocol.send_line(f"name {title}{game.opponent.name}")
         if game.me.rating is not None and game.opponent.rating is not None:
             self.engine.protocol.send_line(f"rating {game.me.rating} {game.opponent.rating}")
