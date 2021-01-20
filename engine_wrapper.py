@@ -154,12 +154,13 @@ class XBoardEngine(EngineWrapper):
         return result.move
 
     def search(self, board, wtime, btime, winc, binc):
+        time_limit = chess.engine.Limit(white_clock=wtime/1000,
+                                        black_clock=btime/1000,
+                                        white_inc=winc/1000,
+                                        black_inc=binc/1000,
+                                        remaining_moves=10000)
         result = self.engine.play(board,
-                                  chess.engine.Limit(white_clock=wtime/1000,
-                                                     black_clock=btime/1000,
-                                                     white_inc=winc/1000,
-                                                     black_inc=binc/1000,
-                                                     remaining_moves=10000),
+                                  time_limit,
                                   info=chess.engine.INFO_CURRLINE,
                                   game=XBoardEngine.GameState.OtherMove)
         return result.move
