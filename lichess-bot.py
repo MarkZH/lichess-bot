@@ -143,6 +143,7 @@ def play_game(li, game_id, control_queue, engine_factory, user_profile, config, 
     board = setup_board(game)
     engine = engine_factory(board)
     engine.get_opponent_info(game)
+    engine.get_time_control(game)
     conversation = Conversation(game, engine, li, __version__, challenge_queue)
 
     logger.info("+++ {}".format(game))

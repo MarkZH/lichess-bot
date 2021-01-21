@@ -44,6 +44,9 @@ class EngineWrapper:
     def __init__(self, board, commands, options=None, silence_stderr=False):
         pass
 
+    def get_time_control(self, game):
+        pass
+
     def first_search(self, board, movetime):
         pass
 
@@ -118,33 +121,39 @@ class UCIEngine(EngineWrapper):
 
 
 class XBoardEngine(EngineWrapper):
-    class GameState(Enum):
-        FirstMove = auto()
-        OtherMove = auto()
-
     def __init__(self, board, commands, options=None, silence_stderr=False):
         self.engine = chess.engine.SimpleEngine.popen_xboard(commands, stderr=subprocess.DEVNULL if silence_stderr else None)
         self.engine.configure(options)
         self.last_move_info = {}
+        self.time_control_sent = False
+
+    def get_time_control(self, game):
+        self.minutes = game.clock_initial // 1000 // 60
+        self.seconds = game.clock_initial // 1000 % 60
+        self.inc = game.clock_increment // 1000
+
+    def send_time(self):
+        self.engine.protocol.send_line(f"level 0 {self.minutes}:{self.seconds} {self.inc}")
+        self.time_control_sent = True
 
     def first_search(self, board, movetime):
         result = self.engine.play(board,
                                   chess.engine.Limit(time=movetime//1000),
-                                  info=chess.engine.INFO_ALL,
-                                  game=XBoardEngine.GameState.FirstMove)
+                                  info=chess.engine.INFO_ALL)
         self.last_move_info = result.info
         return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
+        if not self.time_control_sent:
+            self.send_time()
+
         time_limit = chess.engine.Limit(white_clock=wtime/1000,
                                         black_clock=btime/1000,
                                         white_inc=winc/1000,
-                                        black_inc=binc/1000,
-                                        remaining_moves=10000)
+                                        black_inc=binc/1000)
         result = self.engine.play(board,
                                   time_limit,
                                   info=chess.engine.INFO_ALL,
-                                  game=XBoardEngine.GameState.OtherMove,
                                   ponder=ponder)
         self.last_move_info = result.info
         return result.move, None
