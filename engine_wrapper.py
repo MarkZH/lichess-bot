@@ -148,9 +148,7 @@ class XBoardEngine(EngineWrapper):
             self.send_time()
 
         time_limit = chess.engine.Limit(white_clock=wtime/1000,
-                                        black_clock=btime/1000,
-                                        white_inc=winc/1000,
-                                        black_inc=binc/1000)
+                                        black_clock=btime/1000)
         result = self.engine.play(board,
                                   time_limit,
                                   info=chess.engine.INFO_ALL,
