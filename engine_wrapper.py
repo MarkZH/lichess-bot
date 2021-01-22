@@ -81,16 +81,16 @@ class UCIEngine(EngineWrapper):
         self.last_move_info = {}
 
     def first_search(self, board, movetime):
-        result = self.engine.play(board, chess.engine.Limit(time=movetime/1000), info=chess.engine.INFO_ALL)
+        result = self.engine.play(board, chess.engine.Limit(time=movetime / 1000), info=chess.engine.INFO_ALL)
         self.last_move_info = result.info
         return result.move
 
     def search_with_ponder(self, board, wtime, btime, winc, binc, ponder=False):
         cmds = self.go_commands
-        time_limit = chess.engine.Limit(white_clock=wtime/1000,
-                                        black_clock=btime/1000,
-                                        white_inc=winc/1000,
-                                        black_inc=binc/1000,
+        time_limit = chess.engine.Limit(white_clock=wtime / 1000,
+                                        black_clock=btime / 1000,
+                                        white_inc=winc / 1000,
+                                        black_inc=binc / 1000,
                                         depth=cmds.get("depth"),
                                         nodes=cmds.get("nodes"),
                                         time=cmds.get("movetime"))
@@ -137,7 +137,7 @@ class XBoardEngine(EngineWrapper):
 
     def first_search(self, board, movetime):
         result = self.engine.play(board,
-                                  chess.engine.Limit(time=movetime//1000),
+                                  chess.engine.Limit(time=movetime // 1000),
                                   info=chess.engine.INFO_ALL)
         self.last_move_info = result.info
         return result.move
@@ -146,8 +146,8 @@ class XBoardEngine(EngineWrapper):
         if not self.time_control_sent:
             self.send_time()
 
-        time_limit = chess.engine.Limit(white_clock=wtime/1000,
-                                        black_clock=btime/1000)
+        time_limit = chess.engine.Limit(white_clock=wtime / 1000,
+                                        black_clock=btime / 1000)
         result = self.engine.play(board,
                                   time_limit,
                                   info=chess.engine.INFO_ALL,
