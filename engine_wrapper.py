@@ -3,7 +3,6 @@ import chess
 import chess.engine
 import backoff
 import subprocess
-from enum import Enum, auto
 
 
 @backoff.on_exception(backoff.expo, BaseException, max_time=120)
