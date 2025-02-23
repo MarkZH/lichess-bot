@@ -91,8 +91,7 @@ def disable_restart() -> None:
 
 def signal_handler(signal: int, frame: Optional[FrameType]) -> None:  # noqa: ARG001
     """Terminate lichess-bot."""
-    global terminated
-    global force_quit
+    global terminated, force_quit
     in_starting_thread = __name__ == "__main__"
     if not terminated:
         if in_starting_thread:
@@ -552,7 +551,7 @@ def start_game_thread(active_games: set[str], game_id: str, play_game_args: Play
     play_game_args["game_id"] = game_id
 
     def game_error_handler(error: BaseException) -> None:
-        logger.exception("Game ended due to error:", exc_info=error)
+        logger.exception("Game ended due to error:", exc_info=error)  # noqa: LOG004
         control_queue = play_game_args["control_queue"]
         pgn_queue = play_game_args["pgn_queue"]
         li = play_game_args["li"]

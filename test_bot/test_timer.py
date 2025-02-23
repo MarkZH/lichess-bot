@@ -45,6 +45,7 @@ def test_init() -> None:
     assert t.starting_time is not None
     assert t.time_since_reset() >= timedelta(seconds=10)
 
+
 def test_is_expired() -> None:
     """Test timer expiration."""
     t = timer.Timer(timedelta(seconds=10))
@@ -58,12 +59,14 @@ def test_is_expired() -> None:
     t.starting_time -= 10
     assert t.is_expired()
 
+
 def test_reset() -> None:
     """Test timer reset."""
     t = timer.Timer(timedelta(seconds=10))
     t.reset()
     assert t.starting_time is not None
     assert timer.sec_str(t.time_since_reset()) == timer.sec_str(timedelta(0))
+
 
 def test_time() -> None:
     """Test time measurement, expiration, and time until expiration."""
@@ -86,6 +89,7 @@ def test_time() -> None:
     t = timer.Timer(timedelta(seconds=10))
     t.starting_time -= 5
     assert timer.sec_str(t.time_until_expiration()) == timer.sec_str(timedelta(seconds=5))
+
 
 def test_starting_timestamp() -> None:
     """Test timestamp conversion and integration."""

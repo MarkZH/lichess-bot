@@ -605,8 +605,7 @@ class FillerEngine:
 
         # These types aren't tested by mypy.
         def method(*args: ENGINE_INPUT_ARGS_TYPE, **kwargs: ENGINE_INPUT_KWARGS_TYPE) -> Any:
-            nonlocal main_engine
-            nonlocal method_name
+            nonlocal main_engine, method_name
             return main_engine.notify(method_name, *args, **kwargs)
 
         return method
