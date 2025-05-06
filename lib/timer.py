@@ -2,7 +2,6 @@
 
 from datetime import datetime, timedelta
 from time import perf_counter
-from typing import Optional
 
 
 def msec(time_in_msec: float) -> timedelta:
@@ -73,7 +72,7 @@ class Timer:
     """
 
     def __init__(self, duration: timedelta = zero_seconds,
-                 backdated_timestamp: Optional[datetime] = None) -> None:
+                 backdated_timestamp: datetime | None = None) -> None:
         """
         Start the timer.
 
