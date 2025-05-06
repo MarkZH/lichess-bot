@@ -6,20 +6,21 @@ from queue import Queue
 import logging
 from enum import Enum
 from types import TracebackType
+from typing import TypeAlias
 
-COMMANDS_TYPE = list[str]
-MOVE = PlayResult | list[Move]
-CORRESPONDENCE_QUEUE_TYPE = Queue[str]
-LOGGING_QUEUE_TYPE = Queue[logging.LogRecord]
-REQUESTS_PAYLOAD_TYPE = dict[str, str | int | bool]
-GO_COMMANDS_TYPE = dict[str, str]
-EGTPATH_TYPE = dict[str, str]
-OPTIONS_GO_EGTB_TYPE = dict[str, str | int | bool | EGTPATH_TYPE | GO_COMMANDS_TYPE | None]
-OPTIONS_TYPE = dict[str, str | int | bool | None]
-HOMEMADE_ARGS_TYPE = Limit | bool | MOVE
+COMMANDS_TYPE: TypeAlias = list[str]
+MOVE: TypeAlias = PlayResult | list[Move]
+CORRESPONDENCE_QUEUE_TYPE: TypeAlias = Queue[str]
+LOGGING_QUEUE_TYPE: TypeAlias = Queue[logging.LogRecord]
+REQUESTS_PAYLOAD_TYPE: TypeAlias = dict[str, str | int | bool]
+GO_COMMANDS_TYPE: TypeAlias = dict[str, str]
+EGTPATH_TYPE: TypeAlias = dict[str, str]
+OPTIONS_GO_EGTB_TYPE: TypeAlias = dict[str, str | int | bool | EGTPATH_TYPE | GO_COMMANDS_TYPE | None]
+OPTIONS_TYPE: TypeAlias = dict[str, str | int | bool | None]
+HOMEMADE_ARGS_TYPE: TypeAlias = Limit | bool | MOVE
 
 # Types that still use `Any`.
-CONFIG_DICT_TYPE = dict[str, Any]
+CONFIG_DICT_TYPE: TypeAlias = dict[str, Any]
 
 
 class PerfType(TypedDict, total=False):
@@ -110,12 +111,13 @@ class InfoStrDict(TypedDict, total=False):
     Pv: str
 
 
-InfoDictKeys = Literal["score", "pv", "depth", "seldepth", "time", "nodes", "nps", "tbhits", "multipv", "currmove",
-                       "currmovenumber", "hashfull", "cpuload", "refutation", "currline", "ebf", "wdl", "string",
-                       "ponderpv", "Source", "Pv"]
+InfoDictKeys: TypeAlias = Literal[
+    "score", "pv", "depth", "seldepth", "time", "nodes", "nps", "tbhits", "multipv", "currmove",
+    "currmovenumber", "hashfull", "cpuload", "refutation", "currline", "ebf", "wdl", "string",
+    "ponderpv", "Source", "Pv"]
 
 
-InfoDictValue = PovScore | list[Move] | float | str | Move | dict[Move, list[Move]] | dict[int, list[Move]] | PovWdl
+InfoDictValue: TypeAlias = PovScore | list[Move] | float | str | Move | dict[Move, list[Move]] | dict[int, list[Move]] | PovWdl
 
 
 class PlayerType(TypedDict, total=False):
@@ -248,8 +250,8 @@ class GameEventType(TypedDict, total=False):
     btakeback: bool
 
 
-CONTROL_QUEUE_TYPE = Queue[EventType]
-PGN_QUEUE_TYPE = Queue[EventType | None]
+CONTROL_QUEUE_TYPE: TypeAlias = Queue[EventType]
+PGN_QUEUE_TYPE: TypeAlias = Queue[EventType | None]
 
 
 class PublicDataType(TypedDict, total=False):
@@ -433,7 +435,7 @@ class TokenTestType(TypedDict, total=False):
     expires: int
 
 
-TOKEN_TESTS_TYPE = dict[str, TokenTestType]
+TOKEN_TESTS_TYPE: TypeAlias = dict[str, TokenTestType]
 
 
 class _BackoffDetails(TypedDict):
@@ -453,5 +455,6 @@ class BackoffDetails(_BackoffDetails, total=False):
     value: Any  # present in the on_predicate decorator case
 
 
-ENGINE_INPUT_ARGS_TYPE = OPTIONS_TYPE | type[BaseException] | BaseException | TracebackType | Board | Limit | str | bool | None
-ENGINE_INPUT_KWARGS_TYPE = int | bool | list[Move] | Opponent | None
+ENGINE_INPUT_ARGS_TYPE: TypeAlias = (
+    OPTIONS_TYPE | type[BaseException] | BaseException | TracebackType | Board | Limit | str | bool | None)
+ENGINE_INPUT_KWARGS_TYPE: TypeAlias = int | bool | list[Move] | Opponent | None
