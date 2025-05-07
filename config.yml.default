@@ -163,6 +163,8 @@ challenge:                         # Incoming challenges.
 # block_list:                      # List of users from which the challenges are always declined.
 #   - user1
 #   - user2
+# online_block_list:               # The urls from which to retrieve a list of bot names that will not be challenged. The list should be a text file where each line contains the name of a blocked bot
+#   - example.com/blocklist
 # allow_list:                      # List of users from which challenges are exclusively accepted, all others being declined. If empty, challenges from all users may be accepted.
 #   - user3
 #   - user4
@@ -205,12 +207,13 @@ matchmaking:
 # opponent_max_rating: 4000        # Opponents rating should be below this value (4000 is the maximum rating in lichess).
   opponent_rating_difference: 300  # The maximum difference in rating between the bot's rating and opponent's rating.
   rating_preference: "none"        # One of "none", "high", "low".
-  opponent_allow_tos_violation: false # Set to 'true' to allow challenging bots that violated the Lichess Terms of Service.
   challenge_mode: "random"         # Set it to the mode in which challenges are sent. Possible options are 'casual', 'rated' and 'random'.
   challenge_filter: none           # If a bot declines a challenge, do not issue a similar challenge to that bot. Possible options are 'none', 'coarse', and 'fine'.
 # block_list:                      # The list of bots that will not be challenged
 #   - user1
 #   - user2
+# online_block_list:               # The urls from which to retrieve a list of bot names that will not be challenged. The list should be a text file where each line contains the name of a blocked bot
+#   - example.com/blocklist
   include_challenge_block_list: false  # Do not challenge bots in the challenge: block_list in addition to the matchmaking block list.
 
 # overrides:                       # List of overrides for the matchmaking specifications above. When a challenge is created, either the default specification above or one of the overrides will be randomly chosen.
