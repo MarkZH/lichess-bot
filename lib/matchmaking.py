@@ -3,6 +3,7 @@ import random
 import logging
 import datetime
 import contextlib
+from itertools import filterfalse
 from lib import model
 from lib.timer import Timer, seconds, minutes, days, years
 from collections import defaultdict
@@ -29,7 +30,7 @@ def read_daily_challenges() -> DAILY_TIMERS_TYPE:
     except FileNotFoundError:
         pass
 
-    return list(filter(Timer.is_expired, timers))
+    return list(filterfalse(Timer.is_expired, timers))
 
 
 def write_daily_challenges(daily_challenges: DAILY_TIMERS_TYPE) -> None:
@@ -123,7 +124,7 @@ class Matchmaking:
         100 - 149 challenges --> 3 minutes
         etc.
         """
-        self.daily_challenges = list(filter(Timer.is_expired, self.daily_challenges))
+        self.daily_challenges = list(filterfalse(Timer.is_expired, self.daily_challenges))
         self.daily_challenges.append(Timer(days(1)))
         self.min_wait_time = seconds(60) * ((len(self.daily_challenges) // 50) + 1)
         write_daily_challenges(self.daily_challenges)
