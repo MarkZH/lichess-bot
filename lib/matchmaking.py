@@ -24,9 +24,14 @@ timestamp_format = "%Y-%m-%d %H:%M:%S\n"
 def read_daily_challenges() -> DAILY_TIMERS_TYPE:
     """Read the challenges we have created in the past 24 hours from a text file."""
     timers: DAILY_TIMERS_TYPE = []
+
+    def parse_timer(line: str) -> Timer:
+        """Create a back-dated 1-day timer from a timestamp file line."""
+        return Timer(days(1), datetime.datetime.strptime(line, timestamp_format))
+
     try:
         with open(daily_challenges_file_name) as file:
-            timers.extend(Timer(days(1), datetime.datetime.strptime(line, timestamp_format)) for line in file)
+            timers.extend(parse_timer(line) for line in file)
     except FileNotFoundError:
         pass
 
