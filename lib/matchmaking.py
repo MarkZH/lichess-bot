@@ -25,12 +25,11 @@ def read_daily_challenges() -> DAILY_TIMERS_TYPE:
     timers: DAILY_TIMERS_TYPE = []
     try:
         with open(daily_challenges_file_name) as file:
-            for line in file:
-                timers.append(Timer(days(1), datetime.datetime.strptime(line, timestamp_format)))
+            timers.extend(Timer(days(1), datetime.datetime.strptime(line, timestamp_format)) for line in file)
     except FileNotFoundError:
         pass
 
-    return [timer for timer in timers if not timer.is_expired()]
+    return list(filter(Timer.is_expired, timers))
 
 
 def write_daily_challenges(daily_challenges: DAILY_TIMERS_TYPE) -> None:
@@ -124,7 +123,7 @@ class Matchmaking:
         100 - 149 challenges --> 3 minutes
         etc.
         """
-        self.daily_challenges = [timer for timer in self.daily_challenges if not timer.is_expired()]
+        self.daily_challenges = list(filter(Timer.is_expired, self.daily_challenges))
         self.daily_challenges.append(Timer(days(1)))
         self.min_wait_time = seconds(60) * ((len(self.daily_challenges) // 50) + 1)
         write_daily_challenges(self.daily_challenges)
