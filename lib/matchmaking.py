@@ -31,7 +31,7 @@ def read_daily_challenges() -> DAILY_TIMERS_TYPE:
 
     try:
         with open(daily_challenges_file_name) as file:
-            timers.extend(parse_timer(line) for line in file)
+            timers.extend(map(parse_timer, file))
     except FileNotFoundError:
         pass
 
