@@ -1,6 +1,6 @@
 """Imitate `lichess.py`. Used in tests."""
+from __future__ import annotations
 import time
-from typing import Self
 import chess.engine
 import json
 import logging
@@ -104,7 +104,7 @@ class GameStream(Response):
                 new_game_state["status"] = "started"
                 yield json.dumps(new_game_state).encode("utf-8")
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> GameStream:  # noqa: PYI034
         """Enter game stream context."""
         return self
 
@@ -137,7 +137,7 @@ class EventStream(Response):
                           "compat": {"bot": True,
                                      "board": True}}}).encode("utf-8")
 
-    def __enter__(self) -> Self:
+    def __enter__(self) -> EventStream:  # noqa: PYI034
         """Enter context block."""
         return self
 
