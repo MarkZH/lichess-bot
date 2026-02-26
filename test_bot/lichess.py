@@ -104,6 +104,13 @@ class GameStream(Response):
                 new_game_state["status"] = "started"
                 yield json.dumps(new_game_state).encode("utf-8")
 
+    def __enter__(self) -> Self:
+        """Enter game stream context."""
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        """Exit game stream context."""
+
 
 class EventStream(Response):
     """Imitate lichess.org's EventStream. Used in tests."""
