@@ -1,5 +1,6 @@
 """Imitate `lichess.py`. Used in tests."""
 import time
+from typing import Self
 import chess.engine
 import json
 import logging
@@ -128,6 +129,13 @@ class EventStream(Response):
                           "source": "friend",
                           "compat": {"bot": True,
                                      "board": True}}}).encode("utf-8")
+
+    def __enter__(self) -> Self:
+        """Enter context block."""
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        """Exit context block."""
 
 
 # Docs: https://lichess.org/api.
