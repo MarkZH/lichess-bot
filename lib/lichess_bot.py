@@ -117,14 +117,14 @@ def watch_control_stream(control_queue: CONTROL_QUEUE_TYPE, li: lichess.Lichess)
     error = None
     while not stop.terminated:
         try:
-            response = li.get_event_stream()
-            lines = response.iter_lines()
-            for line in lines:
-                if line:
-                    event = json.loads(line.decode("utf-8"))
-                    control_queue.put_nowait(event)
-                else:
-                    control_queue.put_nowait({"type": "ping"})
+            with li.get_event_stream() as response:
+                lines = response.iter_lines()
+                for line in lines:
+                    if line:
+                        event = json.loads(line.decode("utf-8"))
+                        control_queue.put_nowait(event)
+                    else:
+                        control_queue.put_nowait({"type": "ping"})
         except Exception:
             error = traceback.format_exc()
             break
